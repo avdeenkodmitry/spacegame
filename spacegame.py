@@ -14,15 +14,14 @@ async def animate_spaceship(canvas, row, column, frames):
         column = min(max(column + column_d, 0), max_column - frame_columns)
         for frame in frames:
             ctools.draw_frame(canvas, row, column, frame)
-            for _ in range(1):
-                await asyncio.sleep(0)
+            await asyncio.sleep(0)
             ctools.draw_frame(canvas, row, column, frame, True)
 
 
-async def blink(canvas, row, column, symbol='*'):
+async def blink(canvas, row, column, offset_tics, symbol='*'):
     while True:
         canvas.addstr(row, column, symbol, curses.A_DIM)
-        for _ in range(random.randint(0, 2) * 10):
+        for _ in range(offset_tics):
             await asyncio.sleep(0)
 
         canvas.addstr(row, column, symbol)
@@ -90,6 +89,7 @@ def draw(canvas):
         coroutine = blink(canvas,
                           row,
                           column,
+                          offset_tics=random.randint(0, 2) * 10,
                           symbol=ctools.SYMS[random.randint(0, 3)])
         coroutines.append(coroutine)
     coroutine_spaceship = animate_spaceship(canvas,
@@ -98,7 +98,7 @@ def draw(canvas):
                                             frames)
     coroutine_fire = fire(canvas, max_row // 2, max_column // 2)
     coroutines.extend([coroutine_spaceship, coroutine_fire])
-    while True:
+    while len(coroutines) != 0:
         for coroutine in coroutines:
             try:
                 coroutine.send(None)
@@ -106,11 +106,8 @@ def draw(canvas):
                 coroutines.remove(coroutine)
         canvas.refresh()
         time.sleep(ctools.TIC_TIMEOUT)
-        if len(coroutines) == 0:
-            break
 
 
 if __name__ == '__main__':
-    while True:
-        curses.update_lines_cols()
-        curses.wrapper(draw)
+    curses.update_lines_cols()
+    curses.wrapper(draw)
