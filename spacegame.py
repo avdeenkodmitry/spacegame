@@ -26,10 +26,22 @@ def get_text(file_name):
 def get_all_garbage():
     garbage_names = ['duck.txt', 'hubble.txt', 'lamp.txt', 'trash_large.txt',
                      'trash_small.txt', 'trash_xl.txt']
-    garbage_frames = []
-    for name in garbage_names:
-        garbage_frames.append(get_text('resources/{}'.format(name)))
-    return garbage_frames
+    return [get_text('resources/{}'.format(name)) for name in garbage_names]
+
+
+def get_canvas_maxyx(canvas):
+    """Get true max coordinates of window
+    window.getmaxyx() return size, instead of coordinates of window
+    https://docs.python.org/2/library/curses.html#curses.window.getmaxyx
+
+    Args:
+        canvas: canvas obj
+
+    Returns:
+        tuple: max row and column of the window
+    """
+    row, column = canvas.getmaxyx()
+    return row - 1, column - 1
 
 
 async def sleep(tics=1):
@@ -53,11 +65,11 @@ async def increase_year():
 
 async def fill_orbit_with_garbage(canvas):
     screen = curses.initscr()
-    _, max_column = screen.getmaxyx()
+    _, max_column = get_canvas_maxyx(screen)
     garbage_frames = get_all_garbage()
     uid = 0
     while True:
-        column = random.randint(0, max_column - 1)
+        column = random.randint(0, max_column)
         frame = garbage_frames[random.randint(0, len(garbage_frames)-1)]
         event_loop.create_task(sg.fly_garbage(canvas,
                                               column,
@@ -71,7 +83,7 @@ async def fill_orbit_with_garbage(canvas):
 
 async def show_gameover(canvas):
     label_frame = get_text('resources/gameover.txt')
-    max_row, max_column = canvas.getmaxyx()
+    max_row, max_column = get_canvas_maxyx(canvas)
     frame_rows, frame_columns = ctools.get_frame_size(label_frame)
     label_row = (max_row - frame_rows) // 2
     label_column = (max_column - frame_columns) // 2
@@ -83,7 +95,7 @@ async def show_gameover(canvas):
 async def show_stats():
     global year
     screen = curses.initscr()
-    max_row, max_column = screen.getmaxyx()
+    max_row, max_column = get_canvas_maxyx(screen)
     while True:
         label = 'Year: {}'.format(str(year))
         if year in PHRASES:
@@ -100,7 +112,7 @@ async def show_stats():
 async def run_spaceship(canvas, row, column):
     global spaceship_frame, year
     row_speed = column_speed = 0
-    max_row, max_column = canvas.getmaxyx()
+    max_row, max_column = get_canvas_maxyx(canvas)
     frame_rows, frame_columns = ctools.get_frame_size(spaceship_frame)
     while True:
         row_d, column_d, space_pressed = ctools.read_controls(canvas)
@@ -150,7 +162,18 @@ async def blink(canvas, row, column, offset_tics, symbol='*'):
 
 async def fire(canvas, start_row, start_column, rows_speed=-1,
                columns_speed=0):
-    """Display animation of gun shot. Direction and speed can be specified."""
+    """Display animation of gun shot. Direction and speed can be specified.
+
+    Args:
+        canvas: canvas object
+        start_row (int): start row of fire shot
+        start_column (int): start column of fire shot
+        rows_speed (int): speed of fire shot
+        columns_speed (int): column speed of fire shot
+
+    Returns:
+
+    """
 
     row, column = start_row, start_column
 
@@ -166,7 +189,7 @@ async def fire(canvas, start_row, start_column, rows_speed=-1,
 
     symbol = '-' if columns_speed else '|'
 
-    rows, columns = canvas.getmaxyx()
+    rows, columns = get_canvas_maxyx(canvas)
     max_row, max_column = rows, columns
 
     curses.beep()
@@ -180,13 +203,12 @@ async def fire(canvas, start_row, start_column, rows_speed=-1,
         for obstacle in obstacles:
             if obstacle.has_collision(row, column):
                 obstacles_in_last_collisions.append(obstacle)
-                return
 
 
 def draw(canvas):
     screen = curses.initscr()
     screen.nodelay(True)
-    max_row, max_column = screen.getmaxyx()
+    max_row, max_column = get_canvas_maxyx(screen)
     spaceship_frames = [get_text('resources/rocket_frame_1.txt'),
                         get_text('resources/rocket_frame_2.txt'), ]
     curses.curs_set(False)

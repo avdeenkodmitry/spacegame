@@ -8,7 +8,14 @@ TIC_TIMEOUT = 0.1
 
 
 def read_controls(canvas):
-    """Read keys pressed and returns tuple with controls state."""
+    """Read keys pressed and returns tuple with controls state.
+
+    Args:
+        canvas: canvas object
+
+    Returns:
+        tuple: (int, int, bool) rows and column direction and space pressed ind
+    """
     
     rows_direction = columns_direction = 0
     space_pressed = False
@@ -40,7 +47,19 @@ def read_controls(canvas):
 
 def draw_frame(canvas, start_row, start_column, text, negative=False):
     """Draw multiline text fragment on canvas.
-    Erase text instead of drawing if negative=True is specified."""
+
+    Erase text instead of drawing if negative=True is specified.
+
+    Args:
+        canvas: canvas object
+        start_row (int): start row of the drawn object
+        start_column (int): start column of the drawn object
+        text (str): frame test
+        negative (bool): erase text instead of drawing if negative=True
+
+    Returns:
+        None
+    """
     
     rows_number, columns_number = canvas.getmaxyx()
 
@@ -61,7 +80,8 @@ def draw_frame(canvas, start_row, start_column, text, negative=False):
             if symbol == ' ':
                 continue
 
-            # Check that current position it is not in a lower right corner of the window
+            # Check that current position it is not in a lower right corner
+            # of the window
             # Curses will raise exception in that case. Don`t ask why…
             # https://docs.python.org/3/library/curses.html#curses.window.addch
             if row == rows_number - 1 and column == columns_number - 1:
@@ -72,8 +92,15 @@ def draw_frame(canvas, start_row, start_column, text, negative=False):
 
 
 def get_frame_size(text):
-    """Calculate size of multiline text fragment. Returns pair (rows number, colums number)"""
-    
+    """Calculate size of multiline text fragment.
+
+    Args:
+        text: frame text
+
+    Returns:
+        tuple: (int, int) rows and columns number
+    """
+
     lines = text.splitlines()
     rows = len(lines)
     columns = max([len(line) for line in lines])
