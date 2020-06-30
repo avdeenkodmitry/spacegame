@@ -7,7 +7,21 @@ from explosion import explode
 async def fly_garbage(canvas, column, garbage_frame, uid, obstacles,
                       obstacles_in_last_collisions, speed=0.5):
     """Animate garbage, flying from top to bottom.
-       Сolumn position will stay same, as specified on start."""
+
+    Сolumn position will stay same, as specified on start.
+
+    Args:
+        canvas: canvas object
+        column (int): columnt coordinate for garbage creation
+        garbage_frame (str): frame (image) in str format
+        uid (int): unique identifier used for obstacle association
+        obstacles (list): list of all obstacles
+        obstacles_in_last_collisions (list): list of obstacles
+        speed:
+
+    Returns:
+        None
+    """
     rows_number, columns_number = canvas.getmaxyx()
 
     column = max(column, 0)
@@ -31,8 +45,7 @@ async def fly_garbage(canvas, column, garbage_frame, uid, obstacles,
             center_column = obstacle.column + obstacle.columns_size // 2
             await explode(canvas, center_row, center_column)
             break
-    try:
+    if obstacle in obstacles:
         obstacles.remove(obstacle)
+    if obstacle in obstacles_in_last_collisions:
         obstacles_in_last_collisions.remove(obstacle)
-    finally:
-        return

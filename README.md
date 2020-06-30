@@ -2,6 +2,8 @@
 
 SpaceGame is the small simple console game. The arrow keys are used to control the spaceship.
 
+![](demo/gif_game_record.gif)
+
 ### How to play:
 * The main idea is to avoid garbage as long as possible.
 * You can control the spaceship by the arrows on the keyboard.
